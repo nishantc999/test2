@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use Validator;
 use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
@@ -15,7 +16,7 @@ class UserController extends Controller
     {
         $user=User::get();
    
-        return response()->json(['user'=>$user], 200);
+        return response()->json(['body'=>['users'=>$user],'status'=>"successful"], 200);
     }
 
     /**
@@ -31,13 +32,15 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'string',
-            'profile_image' => 'mimes:jpg,bmp,png',
-            'age' => 'integer',
-        ]);
+      
+
+        $rules=['name' => 'required','profile_image' => 'mimes:jpg,bmp,png','age' => 'integer'];
+        $validated = Validator::make($request->all(),$rules);
+        if ($validated->fails()){
+            return $validated->errors();
+        }
      $data=$request->all();
-    
+   
     unset( $data['profile_image'] );
      if ($request->hasFile('profile_image')) {
         $imageName = time() . '.' . $request->profile_image->extension();
@@ -56,7 +59,7 @@ class UserController extends Controller
     {
    $user=User::whereId($id)->first();
    
-   return response()->json(['user'=>$user], 200);
+   return response()->json(['body'=>['user'=>$user],'status'=>"successful"], 200);
 
     }
 
