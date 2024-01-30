@@ -41,7 +41,7 @@ class UserController extends Controller
         }
      $data=$request->all();
    
-    unset( $data['profile_image'] );
+         unset( $data['profile_image'] );
      if ($request->hasFile('profile_image')) {
         $imageName = time() . '.' . $request->profile_image->extension();
         $request->profile_image->move('assets/', $imageName);
@@ -66,6 +66,7 @@ class UserController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
+
     public function edit(string $id)
     {
         //
@@ -76,7 +77,23 @@ class UserController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+   
+        $rules=['name' => 'required','profile_image' => 'mimes:jpg,bmp,png','age' => 'integer'];
+        $validated = Validator::make($request->all(),$rules);
+        if ($validated->fails()){
+            return $validated->errors();
+        }
+     $data=$request->all();
+   
+         unset( $data['profile_image'] );
+     if ($request->hasFile('profile_image')) {
+        $imageName = time() . '.' . $request->profile_image->extension();
+        $request->profile_image->move('assets/', $imageName);
+        $data['profile_image'] = $imageName;
+    }
+
+     User::whereId($id)->update($data);
+     return response()->json($data, 200);
     }
 
     /**
